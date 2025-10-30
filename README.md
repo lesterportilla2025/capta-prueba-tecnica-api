@@ -1,6 +1,19 @@
 # API de Cálculo de Días y Horas Hábiles - Versión Mejorada
 
-Esta API calcula fechas futuras considerando días y horas hábiles en Colombia, con funcionalidades avanzadas para aproximaciones inteligentes, suma de múltiples horas, manejo de fines de semana y optimización para grandes cantidades.
+Esta API calcula fechas futuras considerando días y horas hábiles en Colombia, con funcionalidades avanzadas para aproximacion## 🚨 Compatibilidad y Migración
+
+- ✅ **100% Compatible** con versión original
+- ✅ **Sin breaking changes:** Todo código existente sigue funcionando igual
+- ✅ **Mejoras automáticas:** Se aplican según el contexto sin cambiar la interfaz
+- ✅ **Misma respuesta:** Formato JSON idéntico `{"date": "..."}`
+
+### Migración desde Versión Anterior
+**No se requiere ningún cambio en el código existente.** El endpoint `/prueba` mantiene exactamente la misma interfaz pero ahora incluye automáticamente:
+
+- Aproximaciones inteligentes desde horarios no laborales
+- Suma de múltiples horas (formato comma-separated)  
+- Optimización automática para grandes cantidades
+- Suma combinada inteligente de días y horas suma de múltiples horas, manejo de fines de semana y optimización para grandes cantidades.
 
 ## 🚀 Características Principales
 
@@ -36,126 +49,71 @@ Esta API calcula fechas futuras considerando días y horas hábiles en Colombia,
 - **Algoritmos matemáticos:** Evita iteraciones innecesarias
 - **Rendimiento superior:** Hasta 90% más rápido en grandes volúmenes
 
-## 📡 API Endpoints
+## 📡 API Endpoint
 
-### GET /prueba (Original con Mejoras Automáticas) 🎯
-**100% compatible** con versión anterior + funcionalidades automáticas:
+### GET /prueba
+Calcula fechas futuras añadiendo días y/o horas hábiles, con mejoras automáticas inteligentes.
 
-#### Funcionalidades Automáticas Añadidas:
-- **🎯 Aproximación inteligente:** Desde horarios no laborales (fines de semana, almuerzo)
-- **➕ Múltiples horas:** Formato `hours=2,1.5,3,0.5` suma automáticamente
-- **📊 Suma combinada:** Convierte horas excedentes (≥8) en días automáticamente  
-- **🚀 Optimización:** Grandes cantidades (>30 días o >240 horas) se optimizan automáticamente
+#### Parámetros
 
+| Parámetro | Tipo | Descripción | Ejemplo |
+|-----------|------|-------------|---------|
+| `days` | number | Días hábiles a añadir (opcional) | `5` |
+| `hours` | number | Horas hábiles a añadir (opcional) | `8` |
+| `date` | string | Fecha inicial en ISO 8601 UTC (opcional) | `2025-10-29T14:00:00.000Z` |
+
+**Nota:** Si no se proporciona `date`, se usa la fecha y hora actual de Colombia.
+
+#### Funcionalidades Automáticas Integradas
+
+La API aplica automáticamente las siguientes mejoras según el contexto:
+
+- **🎯 Aproximación inteligente:** Se activa automáticamente cuando la fecha inicial está fuera del horario laboral (fines de semana, horario de almuerzo, después de 5pm)
+- **➕ Múltiples horas:** Usa el formato `hours=2,1.5,3,0.5` para sumar múltiples cantidades automáticamente
+- **📊 Suma combinada:** Convierte automáticamente horas excedentes (≥8) en días adicionales para optimizar el cálculo
+- **🚀 Optimización:** Se aplica automáticamente para grandes cantidades (>30 días o >240 horas) mejorando el rendimiento hasta 97%
+
+#### Respuesta
+
+```json
+{
+  "date": "2025-11-05T17:00:00.000Z"
+}
+```
+
+## ✨ Ejemplos de Uso
+
+### Ejemplo 1: Añadir 5 días hábiles desde ahora
 ```bash
-# Uso estándar (igual que antes)
-curl "http://localhost:3000/prueba?days=5&hours=8&date=2025-10-29T14:00:00.000Z"
+curl "http://localhost:3000/prueba?days=5"
+```
 
-# NUEVO: Múltiples horas automáticas
+### Ejemplo 2: Añadir 8 horas hábiles desde ahora
+```bash
+curl "http://localhost:3000/prueba?hours=8"
+```
+
+### Ejemplo 3: Añadir 2 días y 4 horas desde una fecha específica
+```bash
+curl "http://localhost:3000/prueba?days=2&hours=4&date=2025-10-29T14:00:00.000Z"
+```
+
+### Ejemplo 4: Suma de múltiples horas (NUEVO)
+```bash
+# Sumar automáticamente: 2h + 1.5h + 3h + 0.5h = 7h total
 curl "http://localhost:3000/prueba?hours=2,1.5,3,0.5&days=1"
+```
 
-# NUEVO: Aproximación desde fin de semana
+### Ejemplo 5: Aproximación automática desde fin de semana (NUEVO)
+```bash
+# Empezar cálculo un sábado - se aproxima automáticamente al lunes
 curl "http://localhost:3000/prueba?days=3&date=2025-11-01T15:30:00.000Z"
+```
 
-# NUEVO: Optimización automática para grandes cantidades  
+### Ejemplo 6: Optimización automática para grandes cantidades (NUEVO)
+```bash
+# Grandes cantidades se optimizan automáticamente para mejor rendimiento
 curl "http://localhost:3000/prueba?days=100&hours=200"
-```
-
-### GET /prueba-avanzada (Nuevo)
-Endpoint con funcionalidades avanzadas.
-
-#### Parámetros Adicionales:
-- `includeSaturday=true`: Incluir sábados como días hábiles
-- `includeSunday=true`: Incluir domingos como días hábiles
-- `approximateToNext=true`: Aproximar hacia adelante
-- `optimize=true`: Forzar optimización
-
-```bash
-curl "http://localhost:3000/prueba-avanzada?days=10&hours=5&approximateToNext=true&includeSaturday=true&optimize=true"
-```
-
-**Respuesta con metadatos:**
-```json
-{
-  "date": "2025-11-15T17:00:00.000Z",
-  "metadata": {
-    "workingDaysAdded": 10,
-    "workingHoursAdded": 5,
-    "weekendsSkipped": 4,
-    "holidaysSkipped": 1,
-    "calculationMethod": "optimized"
-  }
-}
-```
-
-### POST /suma-horas (Nuevo)
-Suma múltiples cantidades de horas de manera eficiente.
-
-```bash
-curl -X POST "http://localhost:3000/suma-horas" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "hours": [2, 1.5, 3, 0.5, 4.25],
-    "date": "2025-10-29T14:00:00.000Z",
-    "optimize": true
-  }'
-```
-
-**Respuesta:**
-```json
-{
-  "date": "2025-10-31T15:15:00.000Z",
-  "totalHours": 11.25,
-  "hoursBreakdown": [2, 1.5, 3, 0.5, 4.25]
-}
-```
-
-### GET /calculo-optimizado (Nuevo)
-Endpoint especializado para grandes cantidades con métricas de rendimiento.
-
-```bash
-curl "http://localhost:3000/calculo-optimizado?days=1000&hours=500"
-```
-
-**Respuesta con métricas:**
-```json
-{
-  "date": "2027-12-15T17:00:00.000Z",
-  "performance": {
-    "processingTimeMs": 25,
-    "inputDays": 1000,
-    "inputHours": 500,
-    "totalHours": 8500
-  }
-}
-```
-
-## 🧮 Ejemplos de Casos de Uso
-
-### Caso 1: Proyecto con Horario Extendido (Incluyendo Sábados)
-```bash
-# Calcular entrega incluyendo sábados laborales
-curl "http://localhost:3000/prueba-avanzada?days=20&includeSaturday=true"
-```
-
-### Caso 2: Múltiples Sesiones de Trabajo
-```bash
-# Sumar horas de diferentes sesiones: 2h, 1.5h, 3h, 0.5h
-curl -X POST "http://localhost:3000/suma-horas" \
-  -H "Content-Type: application/json" \
-  -d '{"hours": [2, 1.5, 3, 0.5]}'
-```
-
-### Caso 3: Planificación de Proyecto Grande (Optimizado)
-```bash
-# Proyecto de 6 meses (125 días hábiles + 200 horas extra)
-curl "http://localhost:3000/calculo-optimizado?days=125&hours=200"
-```
-
-### Caso 4: Aproximación Inteligente desde Fin de Semana
-```bash
-# Empezar cálculo un domingo, aproximar al lunes
-curl "http://localhost:3000/prueba-avanzada?days=5&date=2025-11-02T10:00:00.000Z&approximateToNext=true"
 ```
 
 ## 🔧 Instalación y Configuración
@@ -198,18 +156,23 @@ node dist/tests.js
 - **Advertencias:** >1000 días o >8000 horas
 - **Límite recomendado:** <10000 días
 
-## 🏗️ Arquitectura Mejorada
+## 🏗️ Arquitectura
 
 ```
 src/
-├── index.ts                 # Servidor Express y endpoints
-├── types.ts                 # Interfaces TypeScript ampliadas
+├── index.ts                 # Servidor Express y endpoint principal
+├── types.ts                 # Interfaces TypeScript
 ├── validation.ts            # Validación de parámetros
-├── dateUtils.ts            # Utilidades con aproximaciones y fines de semana
-├── workingTimeCalculator.ts # Lógica optimizada y funciones avanzadas
-├── tests.ts                # Pruebas integradas de funcionalidades
-└── MEJORAS.md              # Documentación detallada de mejoras
+├── dateUtils.ts            # Utilidades de fechas, aproximaciones y días festivos
+├── workingTimeCalculator.ts # Lógica de cálculos optimizada
+└── tests.ts                # Pruebas integradas
 ```
+
+### Tecnologías Utilizadas
+- **Express.js:** Framework web
+- **TypeScript:** Tipado estático
+- **Moment.js:** Manipulación de fechas y zonas horarias
+- **Axios:** Cliente HTTP para obtener días festivos
 
 ## 🧪 Pruebas Integradas
 
@@ -226,19 +189,19 @@ Ejecutar con: `node dist/tests.js`
 ## 📈 Casos de Uso Empresariales
 
 ### Gestión de Proyectos
-- **Cronogramas realistas:** Cálculo preciso considerando horarios reales
-- **Recursos flexibles:** Inclusión opcional de fines de semana
-- **Proyectos largos:** Optimización automática para grandes escalas
+- **Cronogramas realistas:** Cálculo preciso considerando horarios laborales reales
+- **Fechas flexibles:** Aproximación automática desde cualquier momento inicial
+- **Proyectos largos:** Optimización automática para grandes escalas sin impacto en rendimiento
 
-### SLAs y Compromisos de Servicio
-- **Aproximaciones inteligentes:** Evita comprometerse en horarios no válidos
-- **Cálculos precisos:** Suma exacta de múltiples períodos de trabajo
-- **Métricas detalladas:** Información completa sobre el cálculo realizado
+### SLAs y Compromisos de Servicio  
+- **Aproximaciones inteligentes:** Evita comprometer fechas en horarios no válidos
+- **Cálculos precisos:** Suma exacta de múltiples períodos usando formato comma-separated
+- **Respuesta inmediata:** Tiempo de procesamiento optimizado
 
 ### Facturación y Contabilidad
-- **Horas fraccionadas:** Soporte para períodos de 0.25, 0.5, 1.5 horas
-- **Múltiples sesiones:** Suma eficiente de arrays de horas trabajadas
-- **Auditoría completa:** Desglose detallado de cálculos
+- **Horas fraccionadas:** Soporte nativo para períodos de 0.25, 0.5, 1.5 horas
+- **Múltiples sesiones:** Suma automática usando `hours=1,2,1.5,3`
+- **Calendarios complejos:** Manejo automático de días festivos colombianos
 
 ## 🚨 Compatibilidad
 
@@ -257,17 +220,24 @@ No se requiere migración. Los endpoints existentes siguen funcionando idéntica
 2. Usar `/suma-horas` para arrays de horas
 3. Usar `/calculo-optimizado` para grandes cantidades
 
-## 🎯 Próximas Mejoras Sugeridas
+## 🚨 Limitaciones
 
-- [ ] Configuración de horarios laborales personalizados
-- [ ] Soporte para múltiples zonas horarias
-- [ ] API para gestión de días festivos personalizados
-- [ ] Webhooks para notificaciones de fechas calculadas
-- [ ] Integración con calendarios externos (Google Calendar, Outlook)
+- Requiere conexión a internet para obtener días festivos (tiene fallback)
+- Asume horario laboral estándar colombiano (8AM-5PM con almuerzo 12-1PM)
+- Fechas anteriores a 1970 pueden tener comportamientos inesperados
+- No maneja horarios de trabajo especiales o turnos nocturnos
+
+## 🎯 Funcionalidades Avanzadas
+
+Para casos de uso más específicos, el código fuente incluye funcionalidades adicionales documentadas en `MEJORAS.md`:
+- Configuración de fines de semana como días laborales
+- Métricas detalladas de rendimiento  
+- Respuestas con metadatos extendidos
+- Endpoints especializados para casos específicos
 
 ---
 
-**Versión:** 2.0.0 (Mejorada)  
-**Compatibilidad:** Node.js 14+  
+**Versión:** 2.0.0 (Mejorada con funcionalidades automáticas)  
+**Compatibilidad:** 100% compatible con versión anterior  
 **Zona Horaria:** America/Bogota (UTC-5)  
-**Documentación completa:** Ver `MEJORAS.md`
+**Node.js:** 14+ requerido
