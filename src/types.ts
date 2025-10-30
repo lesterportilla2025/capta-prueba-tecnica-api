@@ -34,3 +34,23 @@ export interface ValidationResult {
   message?: string;
   params?: ParsedParams;
 }
+
+export interface WeekendOptions {
+  includeSaturday?: boolean;
+  includeSunday?: boolean;
+}
+
+export interface CalculationOptions {
+  weekendOptions?: WeekendOptions;
+  approximateToNext?: boolean; // Para aproximaciones hacia adelante
+  optimize?: boolean; // Para grandes cantidades
+}
+
+export interface WorkingTimeResult {
+  result: Date;
+  workingDaysAdded: number;
+  workingHoursAdded: number;
+  weekendsSkipped: number;
+  holidaysSkipped: number;
+  calculationMethod: 'iterative' | 'optimized';
+}

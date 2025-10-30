@@ -60,6 +60,31 @@ export function isWorkingDay(date: moment.Moment, holidays: string[]): boolean {
 }
 
 /**
+ * Verifica si es un día hábil considerando opciones de fin de semana
+ */
+export function isWorkingDayWithWeekend(
+  date: moment.Moment, 
+  holidays: string[], 
+  weekendOptions?: { includeSaturday?: boolean; includeSunday?: boolean }
+): boolean {
+  const dayOfWeek = date.day(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  
+  let isValidDay = dayOfWeek >= 1 && dayOfWeek <= 5; // Lunes a viernes por defecto
+  
+  // Incluir sábado si está habilitado
+  if (weekendOptions?.includeSaturday && dayOfWeek === 6) {
+    isValidDay = true;
+  }
+  
+  // Incluir domingo si está habilitado
+  if (weekendOptions?.includeSunday && dayOfWeek === 0) {
+    isValidDay = true;
+  }
+  
+  return isValidDay && !isHoliday(date, holidays);
+}
+
+/**
  * Verifica si está en horario laboral (8am-12pm, 1pm-5pm)
  */
 export function isWorkingHour(date: moment.Moment): boolean {
@@ -70,7 +95,7 @@ export function isWorkingHour(date: moment.Moment): boolean {
 
 /**
  * Ajusta una fecha al próximo momento laboral válido
- * Si está fuera de horario o en día no hábil, ajusta hacia atrás
+ * Si está fuera de horario o en día no hábil, ajusta hacia atrás (comportamiento original)
  */
 export function adjustToWorkingTime(date: moment.Moment, holidays: string[]): moment.Moment {
   const adjusted = date.clone();
@@ -97,6 +122,38 @@ export function adjustToWorkingTime(date: moment.Moment, holidays: string[]): mo
   } else if (hour >= WORKING_HOURS.lunchStart && hour < WORKING_HOURS.lunchEnd) {
     // En horario de almuerzo -> ir a las 11:59am
     adjusted.hour(WORKING_HOURS.lunchStart - 1).minute(59).second(59);
+  }
+
+  return adjusted;
+}
+
+/**
+ * Ajusta una fecha al próximo momento laboral válido hacia adelante
+ * Si está fuera de horario o en día no hábil, aproxima hacia el siguiente momento laboral
+ */
+export function adjustToNextWorkingTime(date: moment.Moment, holidays: string[]): moment.Moment {
+  const adjusted = date.clone();
+
+  // Si no es día hábil, avanzar al siguiente día hábil
+  while (!isWorkingDay(adjusted, holidays)) {
+    adjusted.add(1, 'day');
+  }
+
+  const hour = adjusted.hour();
+  
+  if (hour < WORKING_HOURS.start) {
+    // Antes de las 8am -> ir a las 8am del mismo día
+    adjusted.hour(WORKING_HOURS.start).minute(0).second(0);
+  } else if (hour >= WORKING_HOURS.lunchStart && hour < WORKING_HOURS.lunchEnd) {
+    // En horario de almuerzo -> ir a la 1pm
+    adjusted.hour(WORKING_HOURS.lunchEnd).minute(0).second(0);
+  } else if (hour >= WORKING_HOURS.end) {
+    // Después de las 5pm -> ir a las 8am del siguiente día hábil
+    adjusted.add(1, 'day');
+    while (!isWorkingDay(adjusted, holidays)) {
+      adjusted.add(1, 'day');
+    }
+    adjusted.hour(WORKING_HOURS.start).minute(0).second(0);
   }
 
   return adjusted;
